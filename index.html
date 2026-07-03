@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TecnoOfertas B2B — Mayoreo de iPhones</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#f7f6f3;--surface:#fff;--border:#e5e3dc;--border-strong:#c8c5bc;--text:#1a1917;--text-2:#6b6860;--text-3:#a09d97;--success:#2d6a4f;--success-bg:#d8f3dc;--danger:#9b2335;--danger-bg:#fde8ea;--warning:#7c5000;--warning-bg:#fff3cd;--info:#1a4f7a;--info-bg:#e8f4fd;--radius:8px;--radius-lg:12px;--ff:'DM Sans',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+a{color:inherit}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.brand{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.brand span{color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:8px}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.cart-btn{position:relative;padding:8px 16px;background:var(--text);color:#fff;border:none;border-radius:var(--radius);font-family:var(--ff);font-size:13px;font-weight:500;cursor:pointer}
+.cart-btn:hover{opacity:.85}
+.cart-count{position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;font-size:10px;font-weight:600;border-radius:99px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.admin-link{font-size:12px;color:var(--text-3);background:none;border:none;cursor:pointer}
+.admin-link:hover{color:var(--text-2)}
+
+.hero{max-width:1100px;margin:0 auto;padding:2rem 2rem 0}
+.hero h1{font-size:22px;font-weight:600}
+.hero p{font-size:13px;color:var(--text-2);margin-top:4px}
+.min-note{display:inline-block;margin-top:10px;font-size:12px;background:var(--info-bg);color:var(--info);padding:5px 10px;border-radius:99px;font-weight:500}
+
+.catalog{max-width:1100px;margin:0 auto;padding:1.5rem 2rem 3rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.pcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column}
+.pcard-photo{width:100%;aspect-ratio:1/1;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:11px;overflow:hidden}
+.pcard-photo img{width:100%;height:100%;object-fit:cover}
+.pcard-body{padding:14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.pcard-title{font-size:14px;font-weight:600}
+.cap-pills{display:flex;gap:6px;flex-wrap:wrap}
+.cap-pill{padding:4px 10px;border:1px solid var(--border-strong);border-radius:99px;font-size:12px;background:var(--surface);cursor:pointer;color:var(--text-2)}
+.cap-pill.active{background:var(--text);color:#fff;border-color:var(--text)}
+.pcard-price{font-size:20px;font-weight:600;font-family:'DM Mono',monospace}
+.pcard-price small{font-size:11px;color:var(--text-3);font-weight:400;font-family:var(--ff)}
+.qty-row{display:flex;align-items:center;gap:10px;margin-top:auto}
+.qty-stepper{display:flex;align-items:center;border:1px solid var(--border-strong);border-radius:var(--radius)}
+.qty-stepper button{width:28px;height:30px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text)}
+.qty-stepper button:hover{background:var(--bg)}
+.qty-stepper span{width:32px;text-align:center;font-family:'DM Mono',monospace;font-size:13px}
+.btn-primary{padding:9px 16px;background:var(--text);color:#fff;border:none;border-radius:var(--radius);font-family:var(--ff);font-size:13px;font-weight:500;cursor:pointer;flex:1}
+.btn-primary:hover{opacity:.85}.btn-primary:disabled{opacity:.4;cursor:default}
+.btn-secondary{padding:9px 16px;background:none;color:var(--text-2);border:1px solid var(--border-strong);border-radius:var(--radius);font-family:var(--ff);font-size:13px;cursor:pointer}
+.btn-secondary:hover{background:var(--bg)}
+.btn-danger-sm{padding:5px 10px;font-size:12px;border-radius:6px;border:1px solid var(--danger);background:none;color:var(--danger);cursor:pointer;font-family:var(--ff)}
+.empty-catalog{text-align:center;color:var(--text-3);padding:3rem;font-size:13px}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200}
+.overlay.open{display:block}
+.drawer{position:fixed;top:0;right:-420px;width:400px;max-width:90vw;height:100%;background:var(--surface);z-index:201;transition:right .25s;display:flex;flex-direction:column}
+.drawer.open{right:0}
+.drawer-head{padding:1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.drawer-head h2{font-size:16px;font-weight:600}
+.drawer-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)}
+.drawer-body{flex:1;overflow-y:auto;padding:1.25rem}
+.cart-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.cart-item-photo{width:52px;height:52px;border-radius:6px;background:var(--bg);flex-shrink:0;overflow:hidden}
+.cart-item-photo img{width:100%;height:100%;object-fit:cover}
+.cart-item-info{flex:1;min-width:0}
+.cart-item-info .ti{font-size:13px;font-weight:500}
+.cart-item-info .tc{font-size:12px;color:var(--text-3)}
+.cart-item-ctrl{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.cart-empty{text-align:center;color:var(--text-3);padding:2rem 0;font-size:13px}
+.drawer-foot{padding:1.25rem;border-top:1px solid var(--border)}
+.total-row{display:flex;justify-content:space-between;font-size:15px;font-weight:600;margin-bottom:12px}
+
+.modal{display:none;position:fixed;inset:0;z-index:210;align-items:center;justify-content:center;padding:1rem}
+.modal.open{display:flex}
+.modal-card{background:var(--surface);border-radius:var(--radius-lg);padding:1.75rem;width:100%;max-width:420px;max-height:90vh;overflow-y:auto}
+.modal-card h2{font-size:17px;font-weight:600;margin-bottom:4px}
+.modal-card .sub{font-size:12px;color:var(--text-2);margin-bottom:1.25rem}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{font-size:11px;font-weight:500;color:var(--text-2)}
+.field input,.field textarea,.field select{padding:9px 11px;border:1px solid var(--border-strong);border-radius:var(--radius);font-family:var(--ff);font-size:13px;color:var(--text);background:var(--surface);width:100%}
+.field textarea{resize:vertical;min-height:60px}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--text)}
+.modal-actions{display:flex;gap:10px;margin-top:1rem}
+.form-error{font-size:12px;color:var(--danger);margin-top:8px;min-height:16px}
+
+#confirm-screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:2rem}
+#confirm-screen.open{display:flex}
+.confirm-card{text-align:center;max-width:380px}
+.confirm-check{width:52px;height:52px;border-radius:50%;background:var(--success-bg);color:var(--success);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 1rem}
+.confirm-card h2{font-size:19px;font-weight:600;margin-bottom:6px}
+.confirm-card p{font-size:13px;color:var(--text-2);margin-bottom:1.5rem}
+
+/* Admin */
+#admin-screen{display:none;min-height:100vh}
+#admin-screen.open{display:block}
+#admin-auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:360px}
+.auth-title{font-size:19px;font-weight:600;margin-bottom:1.5rem}
+#admin-panel{display:none}
+#admin-panel.open{display:block}
+.content{max-width:1000px;margin:0 auto;padding:2rem}
+.page-header{margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between}
+.page-title{font-size:19px;font-weight:600}
+.admin-tabs{display:flex;gap:4px;margin-bottom:1.25rem;border-bottom:1px solid var(--border)}
+.admin-tab{padding:8px 4px;margin-right:1.25rem;border:none;background:none;font-family:var(--ff);font-size:13px;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent}
+.admin-tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+.admin-panel-view{display:none}
+.admin-panel-view.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:0;overflow:hidden;margin-bottom:1rem}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px 12px;text-align:left;font-size:13px;border-bottom:1px solid var(--border)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);font-weight:600;background:var(--bg)}
+td input[type=number],td input[type=text]{padding:6px 8px;border:1px solid var(--border-strong);border-radius:6px;font-family:var(--ff);font-size:12px;width:100%}
+.mono{font-family:'DM Mono',monospace}
+.badge{font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500}
+.badge-on{background:var(--success-bg);color:var(--success)}
+.badge-off{background:var(--danger-bg);color:var(--danger)}
+.badge-estado{background:var(--info-bg);color:var(--info)}
+.logout-btn{font-size:12px;color:var(--text-2);background:none;border:none;cursor:pointer}
+#toast{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:300}
+#toast.error{background:var(--danger)}
+.loading{color:var(--text-3);padding:1.5rem;text-align:center;font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- STOREFRONT -->
+<div id="store-screen">
+  <div class="topbar">
+    <div class="brand">TecnoOfertas B2B<span>mayoreo de equipos</span></div>
+    <div class="topbar-right">
+      <button class="admin-link" onclick="openAdmin()">Admin</button>
+      <button class="cart-btn" onclick="openCart()">Carrito<span class="cart-count" id="cart-count" style="display:none">0</span></button>
+    </div>
+  </div>
+  <div class="hero">
+    <h1>Catálogo mayorista de iPhones</h1>
+    <p>Precios por unidad, disponibles en 128GB, 256GB y 512GB.</p>
+    <span class="min-note">Compra mínima: 2 unidades por modelo</span>
+  </div>
+  <div class="catalog" id="catalog">
+    <div class="empty-catalog">Cargando catálogo...</div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div class="overlay" id="cart-overlay" onclick="closeCart()"></div>
+<div class="drawer" id="cart-drawer">
+  <div class="drawer-head">
+    <h2>Tu carrito</h2>
+    <button class="drawer-close" onclick="closeCart()">&times;</button>
+  </div>
+  <div class="drawer-body" id="cart-body"></div>
+  <div class="drawer-foot">
+    <div class="total-row"><span>Total</span><span id="cart-total">$0</span></div>
+    <button class="btn-primary" style="width:100%" id="checkout-btn" onclick="openCheckout()" disabled>Finalizar pedido</button>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal" id="checkout-modal">
+  <div class="modal-card">
+    <h2>Datos del pedido</h2>
+    <div class="sub">Te contactaremos para confirmar disponibilidad y pago.</div>
+    <div class="field"><label>Empresa</label><input id="co-empresa" placeholder="Nombre de tu empresa"></div>
+    <div class="field"><label>Nombre de contacto</label><input id="co-contacto" placeholder="Tu nombre"></div>
+    <div class="field"><label>Email</label><input id="co-email" type="email" placeholder="correo@empresa.com"></div>
+    <div class="field"><label>Teléfono</label><input id="co-telefono" placeholder="Opcional"></div>
+    <div class="field"><label>Notas</label><textarea id="co-notas" placeholder="Opcional"></textarea></div>
+    <div class="form-error" id="co-error"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeCheckout()">Cancelar</button>
+      <button class="btn-primary" id="co-submit" onclick="submitOrder()">Enviar pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRMATION -->
+<div id="confirm-screen">
+  <div class="confirm-card">
+    <div class="confirm-check">&#10003;</div>
+    <h2>Pedido recibido</h2>
+    <p>Gracias, recibimos tu pedido. Te contactaremos pronto para confirmar disponibilidad y coordinar el pago.</p>
+    <button class="btn-primary" onclick="backToStore()">Volver al catálogo</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-screen">
+  <div id="admin-auth">
+    <div class="auth-card">
+      <div class="auth-title">Admin B2B</div>
+      <div class="field"><label>Email</label><input id="admin-email" type="email"></div>
+      <div class="field"><label>Contraseña</label><input id="admin-pass" type="password"></div>
+      <button class="btn-primary" style="width:100%" id="admin-login-btn" onclick="adminLogin()">Entrar</button>
+      <div class="form-error" id="admin-auth-error"></div>
+      <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="backToStore()">Volver a la tienda</button>
+    </div>
+  </div>
+  <div id="admin-panel">
+    <div class="topbar">
+      <div class="brand">TecnoOfertas B2B<span>admin</span></div>
+      <div class="topbar-right">
+        <button class="admin-link" onclick="backToStore()">Ver tienda</button>
+        <button class="logout-btn" onclick="adminLogout()">Salir</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="page-header"><div class="page-title">Panel de administración</div></div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" id="atab-productos" onclick="showAdminTab('productos',this)">Productos</button>
+        <button class="admin-tab" id="atab-pedidos" onclick="showAdminTab('pedidos',this)">Pedidos</button>
+      </div>
+      <div class="admin-panel-view active" id="aview-productos">
+        <div class="card">
+          <table>
+            <thead><tr><th>Modelo</th><th>Capacidad</th><th>Precio (USD)</th><th>Foto (URL)</th><th>Orden</th><th>Activo</th><th></th></tr></thead>
+            <tbody id="admin-productos-body"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="admin-panel-view" id="aview-pedidos">
+        <div class="card">
+          <table>
+            <thead><tr><th>Fecha</th><th>Empresa</th><th>Contacto</th><th>Email</th><th>Total</th><th>Estado</th></tr></thead>
+            <tbody id="admin-pedidos-body"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SURL='https://nwtxmqgwwsturjikbmvh.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53dHhtcWd3d3N0dXJqaWtibXZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTg5OTQsImV4cCI6MjA5NDc5NDk5NH0.XrbE4u25RbMCWuE36EBgHwYN1rmUE4zIV2RPnXMJzFs';
+const MIN_QTY=2;
+let accessToken=null,productos=[],cart=JSON.parse(localStorage.getItem('b2b_cart')||'[]'),cardState={};
+
+async function api(method,path,body,useAuth){
+  const h={'Content-Type':'application/json','apikey':SKEY,'Authorization':'Bearer '+((useAuth&&accessToken)||SKEY),'Prefer':'return=representation'};
+  const r=await fetch(SURL+path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  const t=await r.text();
+  if(!r.ok)throw new Error(t);
+  return t?JSON.parse(t):[];
+}
+
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=type||'';t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
+function money(n){return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2});}
+function saveCart(){localStorage.setItem('b2b_cart',JSON.stringify(cart));}
+
+/* ---------- CATALOG ---------- */
+async function loadCatalog(){
+  try{
+    productos=await api('GET','/rest/v1/b2b_productos?activo=eq.true&order=orden.asc');
+  }catch(e){productos=[];}
+  renderCatalog();
+}
+
+function groupByModelo(){
+  const map={};
+  productos.forEach(p=>{
+    if(!map[p.modelo])map[p.modelo]=[];
+    map[p.modelo].push(p);
+  });
+  return map;
+}
+
+function renderCatalog(){
+  const el=document.getElementById('catalog');
+  const groups=groupByModelo();
+  const modelos=Object.keys(groups);
+  if(!modelos.length){el.innerHTML='<div class="empty-catalog">Aún no hay productos publicados.</div>';return;}
+  el.innerHTML=modelos.map(modelo=>{
+    const variants=groups[modelo];
+    if(!cardState[modelo])cardState[modelo]={capIdx:0,qty:MIN_QTY};
+    const st=cardState[modelo];
+    const v=variants[st.capIdx]||variants[0];
+    const photo=v.foto_url?'<img src="'+v.foto_url+'" alt="'+modelo+'">':modelo;
+    const pills=variants.map((vv,i)=>'<button class="cap-pill'+(i===st.capIdx?' active':'')+'" onclick="selectCap(\''+modelo+'\','+i+')">'+vv.capacidad+'</button>').join('');
+    return '<div class="pcard">'+
+      '<div class="pcard-photo" id="photo-'+cssId(modelo)+'">'+photo+'</div>'+
+      '<div class="pcard-body">'+
+        '<div class="pcard-title">'+modelo+'</div>'+
+        '<div class="cap-pills" id="pills-'+cssId(modelo)+'">'+pills+'</div>'+
+        '<div class="pcard-price" id="price-'+cssId(modelo)+'">'+money(v.precio)+' <small>por unidad</small></div>'+
+        '<div class="qty-row">'+
+          '<div class="qty-stepper">'+
+            '<button onclick="stepQty(\''+modelo+'\',-1)">&minus;</button>'+
+            '<span id="qty-'+cssId(modelo)+'">'+st.qty+'</span>'+
+            '<button onclick="stepQty(\''+modelo+'\',1)">+</button>'+
+          '</div>'+
+          '<button class="btn-primary" onclick="addToCart(\''+modelo+'\')">Agregar</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function cssId(s){return s.replace(/[^a-z0-9]/gi,'-');}
+
+function selectCap(modelo,idx){
+  cardState[modelo].capIdx=idx;
+  renderCatalog();
+}
+function stepQty(modelo,delta){
+  const st=cardState[modelo];
+  st.qty=Math.max(MIN_QTY,st.qty+delta);
+  document.getElementById('qty-'+cssId(modelo)).textContent=st.qty;
+}
+
+function addToCart(modelo){
+  const groups=groupByModelo();
+  const st=cardState[modelo];
+  const v=groups[modelo][st.capIdx];
+  const existing=cart.find(c=>c.producto_id===v.id);
+  if(existing)existing.cantidad+=st.qty;
+  else cart.push({producto_id:v.id,modelo:v.modelo,capacidad:v.capacidad,precio:v.precio,foto_url:v.foto_url,cantidad:st.qty});
+  st.qty=MIN_QTY;
+  saveCart();
+  renderCatalog();
+  renderCartCount();
+  showToast('Agregado al carrito');
+}
+
+/* ---------- CART ---------- */
+function renderCartCount(){
+  const count=cart.reduce((s,c)=>s+c.cantidad,0);
+  const el=document.getElementById('cart-count');
+  if(count>0){el.style.display='flex';el.textContent=count;}else{el.style.display='none';}
+}
+function openCart(){renderCart();document.getElementById('cart-drawer').classList.add('open');document.getElementById('cart-overlay').classList.add('open');}
+function closeCart(){document.getElementById('cart-drawer').classList.remove('open');document.getElementById('cart-overlay').classList.remove('open');}
+
+function renderCart(){
+  const body=document.getElementById('cart-body');
+  if(!cart.length){body.innerHTML='<div class="cart-empty">Tu carrito está vacío.</div>';}
+  else{
+    body.innerHTML=cart.map((c,i)=>{
+      const photo=c.foto_url?'<img src="'+c.foto_url+'">':'';
+      return '<div class="cart-item">'+
+        '<div class="cart-item-photo">'+photo+'</div>'+
+        '<div class="cart-item-info">'+
+          '<div class="ti">'+c.modelo+'</div>'+
+          '<div class="tc">'+c.capacidad+' &middot; '+money(c.precio)+' c/u</div>'+
+          '<div class="cart-item-ctrl">'+
+            '<div class="qty-stepper"><button onclick="cartStep('+i+',-1)">&minus;</button><span>'+c.cantidad+'</span><button onclick="cartStep('+i+',1)">+</button></div>'+
+            '<button class="btn-danger-sm" onclick="cartRemove('+i+')">Quitar</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+  const total=cart.reduce((s,c)=>s+c.cantidad*c.precio,0);
+  document.getElementById('cart-total').textContent=money(total);
+  document.getElementById('checkout-btn').disabled=!cart.length;
+  renderCartCount();
+}
+function cartStep(i,delta){
+  const c=cart[i];
+  const next=c.cantidad+delta;
+  if(next<MIN_QTY)return;
+  c.cantidad=next;
+  saveCart();renderCart();
+}
+function cartRemove(i){
+  cart.splice(i,1);
+  saveCart();renderCart();
+}
+
+/* ---------- CHECKOUT ---------- */
+function openCheckout(){
+  if(!cart.length)return;
+  document.getElementById('co-error').textContent='';
+  document.getElementById('checkout-modal').classList.add('open');
+}
+function closeCheckout(){document.getElementById('checkout-modal').classList.remove('open');}
+
+async function submitOrder(){
+  const empresa=document.getElementById('co-empresa').value.trim();
+  const contacto=document.getElementById('co-contacto').value.trim();
+  const email=document.getElementById('co-email').value.trim();
+  const telefono=document.getElementById('co-telefono').value.trim();
+  const notas=document.getElementById('co-notas').value.trim();
+  const errEl=document.getElementById('co-error');
+  if(!empresa||!contacto||!email){errEl.textContent='Completa empresa, contacto y email.';return;}
+  const btn=document.getElementById('co-submit');
+  btn.disabled=true;btn.textContent='Enviando...';
+  const total=cart.reduce((s,c)=>s+c.cantidad*c.precio,0);
+  try{
+    const pedido=await api('POST','/rest/v1/b2b_pedidos',{empresa,contacto,email,telefono,notas,total,estado:'nuevo'});
+    const pedidoId=pedido[0].id;
+    const items=cart.map(c=>({pedido_id:pedidoId,producto_id:c.producto_id,modelo:c.modelo,capacidad:c.capacidad,cantidad:c.cantidad,precio_unitario:c.precio,subtotal:c.cantidad*c.precio}));
+    await api('POST','/rest/v1/b2b_pedido_items',items);
+    cart=[];saveCart();
+    closeCheckout();closeCart();
+    document.getElementById('store-screen').style.display='none';
+    document.getElementById('confirm-screen').classList.add('open');
+  }catch(e){
+    errEl.textContent='No pudimos enviar tu pedido. Intenta de nuevo.';
+  }
+  btn.disabled=false;btn.textContent='Enviar pedido';
+}
+
+function backToStore(){
+  document.getElementById('confirm-screen').classList.remove('open');
+  document.getElementById('admin-screen').classList.remove('open');
+  document.getElementById('store-screen').style.display='block';
+  loadCatalog();
+}
+
+/* ---------- ADMIN ---------- */
+function openAdmin(){
+  document.getElementById('store-screen').style.display='none';
+  document.getElementById('admin-screen').classList.add('open');
+}
+
+async function adminLogin(){
+  const email=document.getElementById('admin-email').value.trim();
+  const pass=document.getElementById('admin-pass').value;
+  const errEl=document.getElementById('admin-auth-error');
+  errEl.textContent='';
+  if(!email||!pass){errEl.textContent='Completa email y contraseña.';return;}
+  const btn=document.getElementById('admin-login-btn');
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{
+    const res=await fetch(SURL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SKEY},body:JSON.stringify({email,password:pass})});
+    const data=await res.json();
+    if(!res.ok||!data.access_token){errEl.textContent='Correo o contraseña incorrectos.';btn.disabled=false;btn.textContent='Entrar';return;}
+    accessToken=data.access_token;
+    const p=await api('GET','/rest/v1/perfiles?id=eq.'+data.user.id+'&select=*',null,true);
+    if(!p.length||p[0].rol!=='admin'){errEl.textContent='Esta cuenta no tiene acceso de administrador.';accessToken=null;btn.disabled=false;btn.textContent='Entrar';return;}
+    document.getElementById('admin-auth').style.display='none';
+    document.getElementById('admin-panel').classList.add('open');
+    await loadAdminProductos();
+  }catch(e){errEl.textContent='Error de conexión. Intenta de nuevo.';}
+  btn.disabled=false;btn.textContent='Entrar';
+}
+function adminLogout(){
+  accessToken=null;
+  document.getElementById('admin-panel').classList.remove('open');
+  document.getElementById('admin-auth').style.display='flex';
+}
+function showAdminTab(tab,btn){
+  document.querySelectorAll('.admin-panel-view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('aview-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if(tab==='pedidos')loadAdminPedidos();
+}
+
+async function loadAdminProductos(){
+  const body=document.getElementById('admin-productos-body');
+  try{
+    const data=await api('GET','/rest/v1/b2b_productos?order=orden.asc',null,true);
+    body.innerHTML=data.map(p=>
+      '<tr>'+
+        '<td>'+p.modelo+'</td>'+
+        '<td class="mono">'+p.capacidad+'</td>'+
+        '<td><input type="text" id="pr-'+p.id+'" value="'+p.precio+'" style="width:90px"></td>'+
+        '<td><input type="text" id="fu-'+p.id+'" value="'+(p.foto_url||'')+'" placeholder="https://..."></td>'+
+        '<td><input type="text" id="or-'+p.id+'" value="'+p.orden+'" style="width:50px"></td>'+
+        '<td><label><input type="checkbox" id="ac-'+p.id+'" '+(p.activo?'checked':'')+'> <span class="badge '+(p.activo?'badge-on':'badge-off')+'">'+(p.activo?'Activo':'Inactivo')+'</span></label></td>'+
+        '<td><button class="btn-secondary" onclick="saveProducto('+p.id+')">Guardar</button></td>'+
+      '</tr>'
+    ).join('');
+  }catch(e){body.innerHTML='<tr><td colspan="7" class="loading">No se pudo cargar. ¿Iniciaste sesión como admin?</td></tr>';}
+}
+
+async function saveProducto(id){
+  const precio=parseFloat(document.getElementById('pr-'+id).value)||0;
+  const foto_url=document.getElementById('fu-'+id).value.trim()||null;
+  const orden=parseInt(document.getElementById('or-'+id).value)||0;
+  const activo=document.getElementById('ac-'+id).checked;
+  try{
+    await api('PATCH','/rest/v1/b2b_productos?id=eq.'+id,{precio,foto_url,orden,activo},true);
+    showToast('Producto actualizado');
+    await loadAdminProductos();
+  }catch(e){showToast('No se pudo guardar','error');}
+}
+
+async function loadAdminPedidos(){
+  const body=document.getElementById('admin-pedidos-body');
+  try{
+    const data=await api('GET','/rest/v1/b2b_pedidos?order=created_at.desc',null,true);
+    if(!data.length){body.innerHTML='<tr><td colspan="6" class="loading">Sin pedidos todavía.</td></tr>';return;}
+    body.innerHTML=data.map(p=>
+      '<tr>'+
+        '<td>'+new Date(p.created_at).toLocaleDateString('es-MX')+'</td>'+
+        '<td>'+p.empresa+'</td>'+
+        '<td>'+p.contacto+'</td>'+
+        '<td>'+p.email+'</td>'+
+        '<td class="mono">'+money(p.total)+'</td>'+
+        '<td><span class="badge badge-estado">'+p.estado+'</span></td>'+
+      '</tr>'
+    ).join('');
+  }catch(e){body.innerHTML='<tr><td colspan="6" class="loading">No se pudo cargar.</td></tr>';}
+}
+
+loadCatalog();
+</script>
+</body>
+</html>
