@@ -460,13 +460,31 @@ async function loadAdminProductos(){
         '<td>'+p.modelo+'</td>'+
         '<td class="mono">'+p.capacidad+'</td>'+
         '<td><input type="text" id="pr-'+p.id+'" value="'+p.precio+'" style="width:90px"></td>'+
-        '<td><input type="text" id="fu-'+p.id+'" value="'+(p.foto_url||'')+'" placeholder="https://..."></td>'+
+        '<td><input type="text" id="fu-'+p.id+'" value="'+(p.foto_url||'')+'" placeholder="https://..." style="margin-bottom:4px">'+
+          '<input type="file" accept="image/*" style="font-size:11px;width:100%" onchange="uploadFoto('+p.id+',\''+p.modelo.replace(/'/g,"")+'\',\''+p.capacidad+'\',this)"></td>'+
         '<td><input type="text" id="or-'+p.id+'" value="'+p.orden+'" style="width:50px"></td>'+
         '<td><label><input type="checkbox" id="ac-'+p.id+'" '+(p.activo?'checked':'')+'> <span class="badge '+(p.activo?'badge-on':'badge-off')+'">'+(p.activo?'Activo':'Inactivo')+'</span></label></td>'+
         '<td><button class="btn-secondary" onclick="saveProducto('+p.id+')">Guardar</button></td>'+
       '</tr>'
     ).join('');
   }catch(e){body.innerHTML='<tr><td colspan="7" class="loading">No se pudo cargar. ¿Iniciaste sesión como admin?</td></tr>';}
+}
+
+async function uploadFoto(id,modelo,capacidad,inputEl){
+  const file=inputEl.files[0];
+  if(!file)return;
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const path=cssId((modelo+'-'+capacidad).toLowerCase())+'.'+ext;
+  try{
+    const res=await fetch(SURL+'/storage/v1/object/b2b-fotos/'+path,{
+      method:'POST',
+      headers:{'apikey':SKEY,'Authorization':'Bearer '+accessToken,'x-upsert':'true','Content-Type':file.type},
+      body:file
+    });
+    if(!res.ok)throw new Error(await res.text());
+    document.getElementById('fu-'+id).value=SURL+'/storage/v1/object/public/b2b-fotos/'+path+'?t='+Date.now();
+    showToast('Foto subida, dale Guardar para aplicarla');
+  }catch(e){showToast('No se pudo subir la foto','error');}
 }
 
 async function saveProducto(id){
